@@ -1,10 +1,19 @@
 pipeline {
   agent any
 
+  environment {
+    IMAGE_NAME = "<ваш-логин>/demo-app"
+    IMAGE_TAG = "${env.BUILD_NUMBER}"
+  }
+
   options {
     timestamps()
   }
-  
+
+  triggers {
+    pollSCM('H/5 * * * *')
+  }
+
   stages {
     stage('Checkout') {
       steps {
@@ -28,6 +37,19 @@ pipeline {
         sh './venv/bin/pytest --junitxml=result.xml'
       }
     }
+    stage('Docker Build') {
+       steps {
+       sh "docker build -t${IMAGE_NAME}:${IMAGE_TAG} -t${IMAGE_NAME}:latest ."
+       }
+    }
+    stage('Docker Push') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')])  {
+          sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+          sh "docker push${IMAGE_NAME}:${IMAGE_TAG}"
+          sh "docker push${IMAGE_NAME}:latest"
+        }
+      }
   }
   post {
     always {
