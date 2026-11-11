@@ -9,7 +9,7 @@ def add(a, b):
  return a + b
 def divide(a, b):
  if b == 0:
- raise ValueError("Деление на ноль недопустимо")
+  raise ValueError("Деление на ноль недопустимо")
  return a / b
 
 @app.route("/")
@@ -18,7 +18,7 @@ def index():
 nodename}\n"
 
 @app.route("/health")
- health():
+def health():
  return {"status": "ok", "version": APP_VERSION}, 200
 
 if __name__ == "__main__":
