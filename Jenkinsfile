@@ -51,6 +51,14 @@ pipeline {
         }
       }
     }
+    stage('Deploy to Kubernetes') {
+      steps {
+        withKubeConfig([credentialsId: 'minikube-kubeconfig']) {
+          sh "kubectl set image deployment/demo-app-deployment app=${IMAGE_NAME}:${IMAGE_TAG} --record=false"
+          sh "kubectl rollout status deployment/demo-app-deployment --timeout=120s"
+        }
+      }
+    }
   }
   post {
     always {
